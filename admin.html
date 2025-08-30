@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบจัดการความปลอดภัย - โรงเรียนบางสะพานวิทยา</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Sarabun', sans-serif; }
+        .sidebar-item:hover { background: linear-gradient(135deg, #22c55e, #84cc16); transform: translateX(4px); }
+        .sidebar-item-danger:hover { background: linear-gradient(135deg, #ef4444, #f87171); transform: translateX(4px); }
+        .status-badge { transition: all 0.3s ease; }
+        .status-badge:hover { transform: scale(1.05); }
+        .modal-backdrop { backdrop-filter: blur(4px); }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(34, 197, 94, 0.15); }
+        .btn-primary { background: linear-gradient(135deg, #22c55e, #16a34a); }
+        .btn-primary:hover { background: linear-gradient(135deg, #16a34a, #15803d); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="loginPage" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-400 via-yellow-300 to-green-500">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
+            <div class="text-center mb-8">
+                <div><img src="LOGO BSPWIT.png" alt="โลโก้โรงเรียน" class="h-36 mx-auto mb-4" onerror="this.onerror=null; this.src='https://placehold.co/100x100/E2E8F0/4A5568?text=Logo';"></div>
+                <h1 class="text-2xl font-bold text-gray-800 mb-2">ระบบจัดการสถานศึกษาปลอดภัย</h1>
+                <p class="text-gray-600">โรงเรียนบางสะพานวิทยา</p>
+            </div>
+            <form id="loginForm" class="space-y-6">
+                <div><label class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-user mr-2"></i>ชื่อผู้ใช้</label><input type="text" id="username" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="กรอกชื่อผู้ใช้" required></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-lock mr-2"></i>รหัสผ่าน</label><input type="password" id="password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="กรอกรหัสผ่าน" required></div>
+                <button type="submit" class="w-full btn-primary text-white py-3 rounded-lg font-medium transition-all duration-300 hover:shadow-lg"><i class="fas fa-sign-in-alt mr-2"></i>เข้าสู่ระบบ</button>
+            </form>
+            <div id="loginError" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg hidden"><i class="fas fa-exclamation-triangle mr-2"></i>ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</div>
+        </div>
+    </div>
+
+    <div id="dashboard" class="hidden min-h-screen bg-gray-50">
+        <header class="bg-white shadow-sm border-b border-gray-200">
+            <div class="flex items-center justify-between px-6 py-4">
+                <div class="flex items-center space-x-4">
+                    <div><img src="LOGO BSPWIT.png" alt="โลโก้โรงเรียน" class="h-16 mx-auto mb-4" onerror="this.onerror=null; this.src='https://placehold.co/100x100/E2E8F0/4A5568?text=Logo';"></div>
+                    <div><h1 class="text-xl font-bold text-gray-800">ระบบจัดการความปลอดภัย</h1><p class="text-sm text-gray-600">โรงเรียนบางสะพานวิทยา</p></div>
+                </div>
+                <button id="logoutBtn" class="flex items-center space-x-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"><i class="fas fa-sign-out-alt"></i><span>ออกจากระบบ</span></button>
+            </div>
+        </header>
+        <div class="flex">
+            <aside class="w-64 bg-white shadow-sm min-h-screen">
+                <nav class="p-4 space-y-2">
+                    <button class="sidebar-item w-full flex items-center space-x-3 px-4 py-3 text-left rounded-lg transition-all duration-300 bg-green-500 text-white" data-page="overview"><i class="fas fa-tachometer-alt"></i><span>ภาพรวม</span></button>
+                    <button class="sidebar-item sidebar-item-danger w-full flex items-center space-x-3 px-4 py-3 text-left rounded-lg transition-all duration-300 text-gray-700 hover:text-white" data-page="emergency"><i class="fas fa-triangle-exclamation"></i><span>เหตุฉุกเฉิน</span></button>
+                    <button class="sidebar-item w-full flex items-center space-x-3 px-4 py-3 text-left rounded-lg transition-all duration-300 text-gray-700 hover:text-white" data-page="reports"><i class="fas fa-flag"></i><span>รายงานปัญหา</span></button>
+                    <button class="sidebar-item w-full flex items-center space-x-3 px-4 py-3 text-left rounded-lg transition-all duration-300 text-gray-700 hover:text-white" data-page="equipment"><i class="fas fa-tools"></i><span>อุปกรณ์</span></button>
+                    <button class="sidebar-item w-full flex items-center space-x-3 px-4 py-3 text-left rounded-lg transition-all duration-300 text-gray-700 hover:text-white" data-page="news"><i class="fas fa-newspaper"></i><span>ข่าวสาร</span></button>
+                </nav>
+            </aside>
+            <main class="flex-1 p-6">
+                <div id="overviewPage" class="page-content">
+                    <div class="mb-6"><h2 class="text-2xl font-bold text-gray-800 mb-2">ภาพรวมระบบ</h2><p class="text-gray-600">สรุปข้อมูลสำคัญของระบบจัดการความปลอดภัย</p></div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-white p-6 rounded-xl shadow-sm card-hover transition-all duration-300">
+                            <div class="flex items-center justify-between"><div><p class="text-sm font-medium text-gray-600">ปัญหาใหม่</p><p class="text-3xl font-bold text-yellow-600" id="newReportsCount">0</p></div><div class="bg-yellow-100 w-12 h-12 rounded-full flex items-center justify-center"><i class="fas fa-flag text-yellow-600"></i></div></div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm card-hover transition-all duration-300">
+                            <div class="flex items-center justify-between"><div><p class="text-sm font-medium text-gray-600">อุปกรณ์ทั้งหมด</p><p class="text-3xl font-bold text-green-600" id="equipmentCount">0</p></div><div class="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center"><i class="fas fa-tools text-green-600"></i></div></div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm card-hover transition-all duration-300">
+                            <div class="flex items-center justify-between"><div><p class="text-sm font-medium text-gray-600">เหตุฉุกเฉิน (ทั้งหมด)</p><p class="text-3xl font-bold text-red-600" id="emergencyCount">0</p></div><div class="bg-red-100 w-12 h-12 rounded-full flex items-center justify-center"><i class="fas fa-triangle-exclamation text-red-600"></i></div></div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm p-6"><h3 class="text-lg font-semibold text-gray-800 mb-4"><i class="fas fa-clock mr-2 text-gray-600"></i>รายงานล่าสุด (ปัญหาทั่วไป)</h3><div class="space-y-3" id="recentReports"></div></div>
+                </div>
+                
+                <div id="emergencyPage" class="page-content hidden">
+                    <div class="flex items-center justify-between mb-6"><div><h2 class="text-2xl font-bold text-red-600 mb-2">รายงานเหตุฉุกเฉิน</h2><p class="text-gray-600">รายการแจ้งเหตุฉุกเฉินเร่งด่วน</p></div></div>
+                    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto"><table class="w-full"><thead class="bg-red-50"><tr><th class="px-6 py-3 text-left text-xs font-medium text-red-700 uppercase tracking-wider">ประเภทเหตุ</th><th class="px-6 py-3 text-left text-xs font-medium text-red-700 uppercase tracking-wider">สถานที่</th><th class="px-6 py-3 text-left text-xs font-medium text-red-700 uppercase tracking-wider">ผู้แจ้ง</th><th class="px-6 py-3 text-left text-xs font-medium text-red-700 uppercase tracking-wider">วันที่</th><th class="px-6 py-3 text-left text-xs font-medium text-red-700 uppercase tracking-wider">ไฟล์แนบ</th><th class="px-6 py-3 text-left text-xs font-medium text-red-700 uppercase tracking-wider">การจัดการ</th></tr></thead><tbody id="emergencyTable" class="bg-white divide-y divide-gray-200"></tbody></table></div>
+                    </div>
+                </div>
+
+                <div id="reportsPage" class="page-content hidden">
+                    <div class="flex items-center justify-between mb-6"><div><h2 class="text-2xl font-bold text-gray-800 mb-2">รายงานปัญหาทั่วไป</h2><p class="text-gray-600">จัดการรายงานปัญหาจากผู้ใช้</p></div></div>
+                    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50"><tr><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ปัญหา</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สถานที่</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">วันที่</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สถานะ</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">การจัดการ</th></tr></thead><tbody id="reportsTable" class="bg-white divide-y divide-gray-200"></tbody></table></div>
+                    </div>
+                </div>
+
+                <div id="equipmentPage" class="page-content hidden">
+                    <div class="flex items-center justify-between mb-6"><div><h2 class="text-2xl font-bold text-gray-800 mb-2">จัดการอุปกรณ์</h2><p class="text-gray-600">เพิ่ม แก้ไข และลบอุปกรณ์ในระบบ</p></div><button id="addEquipmentBtn" class="btn-primary text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:shadow-lg"><i class="fas fa-plus mr-2"></i>เพิ่มอุปกรณ์</button></div>
+                    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50"><tr><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่ออุปกรณ์</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สถานที่</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ตรวจล่าสุด</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ตรวจครั้งถัดไป</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">การจัดการ</th></tr></thead><tbody id="equipmentTable" class="bg-white divide-y divide-gray-200"></tbody></table></div>
+                    </div>
+                </div>
+
+                <div id="newsPage" class="page-content hidden">
+                    <div class="flex items-center justify-between mb-6"><div><h2 class="text-2xl font-bold text-gray-800 mb-2">จัดการข่าวสาร</h2><p class="text-gray-600">เพิ่ม แก้ไข และลบข่าวสารในระบบ</p></div><button id="addNewsBtn" class="btn-primary text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:shadow-lg"><i class="fas fa-plus mr-2"></i>เพิ่มข่าวสาร</button></div>
+                    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50"><tr><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">หัวข้อข่าว</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">วันที่เผยแพร่</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">การจัดการ</th></tr></thead><tbody id="newsTable" class="bg-white divide-y divide-gray-200"></tbody></table></div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div id="equipmentModal" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md mx-auto">
+            <div class="flex items-center justify-between mb-4"><h3 class="text-lg font-semibold text-gray-800"><i class="fas fa-tools mr-2 text-green-600"></i><span id="equipmentModalTitle">เพิ่มอุปกรณ์ใหม่</span></h3><button id="closeEquipmentModal" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button></div>
+            <form id="equipmentForm" class="space-y-4">
+                <input type="hidden" id="equipmentId"><input type="hidden" id="equipmentDate">
+                <div><label class="block text-sm font-medium text-gray-700 mb-2">ชื่ออุปกรณ์</label><input type="text" id="equipmentName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" required></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-2">สถานที่</label><input type="text" id="equipmentLocation" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-2">ตรวจสอบครั้งล่าสุด</label><input type="date" id="equipmentLastChecked" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-2">ตรวจสอบครั้งถัดไป</label><input type="date" id="equipmentNextCheck" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required></div>
+                <div class="flex space-x-3 pt-4"><button type="submit" class="flex-1 btn-primary text-white py-2 rounded-lg font-medium"><i class="fas fa-save mr-2"></i>บันทึก</button><button type="button" id="cancelEquipment" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg"><i class="fas fa-times mr-2"></i>ยกเลิก</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="newsModal" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md mx-auto">
+            <div class="flex items-center justify-between mb-4"><h3 class="text-lg font-semibold text-gray-800"><i class="fas fa-newspaper mr-2 text-yellow-600"></i><span id="newsModalTitle">เพิ่มข่าวสารใหม่</span></h3><button id="closeNewsModal" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button></div>
+            <form id="newsForm" class="space-y-4">
+                <input type="hidden" id="newsId">
+                <div><label class="block text-sm font-medium text-gray-700 mb-2">หัวข้อข่าว</label><input type="text" id="newsTitle" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="กรอกหัวข้อข่าว" required></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-2">เนื้อหาข่าว</label><textarea id="newsContent" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="กรอกเนื้อหาข่าว" required></textarea></div>
+                <div class="flex space-x-3 pt-4"><button type="submit" class="flex-1 btn-primary text-white py-2 rounded-lg font-medium"><i class="fas fa-save mr-2"></i>บันทึก</button><button type="button" id="cancelNews" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg"><i class="fas fa-times mr-2"></i>ยกเลิก</button></div>
+            </form>
+        </div>
+    </div>
+    
+    <div id="detailsModal" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-lg mx-auto max-h-full overflow-y-auto">
+            <div class="flex items-center justify-between mb-4 border-b pb-3">
+                <h3 class="text-xl font-semibold text-gray-800" id="detailsModalTitle">รายละเอียด</h3>
+                <button id="closeDetailsModal" class="text-gray-400 hover:text-gray-600 transition-colors"><i class="fas fa-times text-2xl"></i></button>
+            </div>
+            <div id="detailsModalContent" class="space-y-3 text-gray-700 text-base">
+                </div>
+        </div>
+    </div>
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxRuhZt-OxUsU23t8eTtNiqJKVMazsFEm-iIXhSq9yzf5grGDzcQ-wvm9TsQxL-S0qL/exec';
+        let allReports = [], allEquipment = [], allNews = [], allEmergencyReports = [];
+        
+        // Element Getters
+        const loginForm = document.getElementById('loginForm');
+        const loginPage = document.getElementById('loginPage');
+        const dashboard = document.getElementById('dashboard');
+        const loginError = document.getElementById('loginError');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const equipmentModal = document.getElementById("equipmentModal");
+        const newsModal = document.getElementById("newsModal");
+        const detailsModal = document.getElementById("detailsModal"); // <-- ตัวแปร Modal ใหม่
+
+        // --- Authentication ---
+        loginForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            if (username === "bspwit" && password === "bspwit@50") {
+                sessionStorage.setItem("isLoggedIn", "true");
+                loginPage.classList.add("hidden");
+                dashboard.classList.remove("hidden");
+                loadDashboard();
+            } else {
+                loginError.classList.remove("hidden");
+                setTimeout(() => loginError.classList.add("hidden"), 3000);
+            }
+        });
+
+        logoutBtn.addEventListener("click", () => {
+            sessionStorage.removeItem("isLoggedIn");
+            dashboard.classList.add("hidden");
+            loginPage.classList.remove("hidden");
+            document.getElementById("username").value = "";
+            document.getElementById("password").value = "";
+        });
+
+        if (sessionStorage.getItem("isLoggedIn") === "true") {
+            loginPage.classList.add("hidden");
+            dashboard.classList.remove("hidden");
+            loadDashboard();
+        }
+
+        // --- Page Navigation ---
+        const sidebarItems = document.querySelectorAll(".sidebar-item");
+        const pageContents = document.querySelectorAll(".page-content");
+        sidebarItems.forEach(item => {
+            item.addEventListener("click", () => {
+                const page = item.getAttribute("data-page");
+                sidebarItems.forEach(i => {
+                    i.classList.remove("bg-green-500", "text-white");
+                    i.classList.add("text-gray-700");
+                });
+                item.classList.add("bg-green-500", "text-white");
+                pageContents.forEach(p => p.classList.add("hidden"));
+                document.getElementById(page + "Page").classList.remove("hidden");
+
+                switch (page) {
+                    case 'reports': loadReports(); break;
+                    case 'equipment': loadEquipment(); break;
+                    case 'news': loadNews(); break;
+                    case 'emergency': loadEmergencyReports(); break;
+                    case 'overview': loadDashboard(); break;
+                }
+            });
+        });
+
+        // --- Data Fetching ---
+        const fetchData = async (action) => {
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=${action}`);
+                if (!response.ok) throw new Error(`Network response was not ok for ${action}`);
+                return await response.json();
+            } catch (error) {
+                console.error("Fetch error:", error);
+                alert(`เกิดข้อผิดพลาดในการดึงข้อมูล ${action}`);
+                return [];
+            }
+        };
+
+        const postData = async (payload) => {
+            try {
+                const response = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
+                if (!response.ok) throw new Error("Network response was not ok for POST");
+                const result = await response.json();
+                if (result.status !== 'success') throw new Error(result.message);
+                return result;
+            } catch (error) {
+                console.error("Post error:", error);
+                alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล: " + error.message);
+                return null;
+            }
+        };
+
+        // --- Page Loaders ---
+        async function loadDashboard() {
+            [allReports, allEquipment, allEmergencyReports] = await Promise.all([
+                fetchData("getReports"), fetchData("getEquipment"), fetchData("getEmergencyReports")
+            ]);
+            document.getElementById("newReportsCount").textContent = allReports.filter(r => r.status === 'ใหม่').length;
+            document.getElementById("equipmentCount").textContent = allEquipment.length;
+            document.getElementById("emergencyCount").textContent = allEmergencyReports.length;
+            
+            const recentReportsContainer = document.getElementById("recentReports");
+            recentReportsContainer.innerHTML = allReports.slice(-3).reverse().map(r => 
+                `<div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center space-x-3"><i class="fas fa-flag text-yellow-500"></i>
+                        <div><p class="font-medium text-gray-800">${r.problemType}</p><p class="text-sm text-gray-600">${r.location}</p></div>
+                    </div><span class="px-3 py-1 ${getStatusColor(r.status)} rounded-full text-sm font-medium">${r.status}</span>
+                </div>`
+            ).join("") || '<p class="text-gray-500">ยังไม่มีรายงานปัญหาทั่วไป</p>';
+        }
+        
+        async function loadEmergencyReports() {
+            allEmergencyReports = await fetchData("getEmergencyReports");
+            const tableBody = document.getElementById("emergencyTable");
+            if (!allEmergencyReports || allEmergencyReports.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="6" class="text-center p-8 text-gray-500">ยังไม่มีรายงานเหตุฉุกเฉิน</td></tr>`; return;
+            }
+            tableBody.innerHTML = allEmergencyReports.slice().reverse().map(report => {
+                const fileLink = (report.fileUrl && report.fileUrl !== 'ไม่มีไฟล์แนบ') 
+                    ? `<a href="${report.fileUrl}" target="_blank" class="text-blue-600 hover:underline"><i class="fas fa-paperclip"></i> ดูไฟล์</a>`
+                    : '<span class="text-gray-400">-</span>';
+                return `<tr>
+                    <td class="px-6 py-4"><div class="text-sm font-medium text-red-900">${report.emergencyType}</div></td>
+                    <td class="px-6 py-4 text-sm text-gray-500">${report.location}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500">${report.reporterName} (${report.reporterRole})</td>
+                    <td class="px-6 py-4 text-sm text-gray-500">${new Date(report.timestamp).toLocaleString("th-TH")}</td>
+                    <td class="px-6 py-4 text-sm">${fileLink}</td>
+                    <td class="px-6 py-4 text-sm font-medium"><button onclick="viewEmergencyReport(${report.id})" class="text-red-600 hover:text-red-900"><i class="fas fa-eye"></i> ดูรายละเอียด</button></td>
+                </tr>`;
+            }).join("");
+        }
+
+        async function loadReports() {
+            allReports = await fetchData("getReports");
+            document.getElementById("reportsTable").innerHTML = allReports.slice().reverse().map(e => 
+                `<tr>
+                    <td class="px-6 py-4"><div class="text-sm font-medium text-gray-900">${e.problemType}</div></td>
+                    <td class="px-6 py-4 text-sm text-gray-500">${e.location}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500">${new Date(e.timestamp).toLocaleString("th-TH")}</td>
+                    <td class="px-6 py-4"><button onclick="changeStatus(${e.id})" class="status-badge px-3 py-1 ${getStatusColor(e.status)} rounded-full text-sm font-medium">${e.status}</button></td>
+                    <td class="px-6 py-4 text-sm font-medium"><button onclick="viewReport(${e.id})" class="text-green-600 hover:text-green-900"><i class="fas fa-eye"></i> ดูรายละเอียด</button></td>
+                </tr>`
+            ).join("");
+        }
+        
+        async function loadEquipment(){/*...เหมือนเดิม...*/ }
+        async function loadNews(){/*...เหมือนเดิม...*/ }
+
+        // --- Modal View Functions (Upgraded) ---
+        function viewEmergencyReport(id) {
+            const report = allEmergencyReports.find(r => r.id == id);
+            if (!report) return;
+
+            const modalTitle = document.getElementById("detailsModalTitle");
+            const modalContent = document.getElementById("detailsModalContent");
+
+            const fileLinkHTML = (report.fileUrl && report.fileUrl !== 'ไม่มีไฟล์แนบ')
+                ? `<a href="${report.fileUrl}" target="_blank" class="text-blue-600 hover:underline">คลิกเพื่อดูไฟล์</a>` : '<span>ไม่มีไฟล์แนบ</span>';
+
+            modalTitle.innerHTML = `<i class="fas fa-triangle-exclamation mr-2 text-red-500"></i>รายละเอียดเหตุฉุกเฉิน`;
+            modalContent.innerHTML = `
+                <p><strong>ประเภทเหตุ:</strong> ${report.emergencyType}</p>
+                <p><strong>สถานที่:</strong> ${report.location}</p>
+                <hr class="my-2"><p><strong>รายละเอียด:</strong></p>
+                <p class="pl-2 bg-gray-50 p-2 rounded-md whitespace-pre-wrap">${report.description}</p>
+                <hr class="my-2">
+                <p><strong>ผู้แจ้ง:</strong> ${report.reporterName} (${report.reporterRole})</p>
+                <p><strong>วันที่แจ้ง:</strong> ${new Date(report.timestamp).toLocaleString("th-TH")}</p>
+                <p><strong>ไฟล์แนบ:</strong> ${fileLinkHTML}</p>
+            `;
+            openModal(detailsModal);
+        }
+
+        function viewReport(id) {
+            const report = allReports.find(r => r.id == id);
+            if (!report) return;
+
+            const modalTitle = document.getElementById("detailsModalTitle");
+            const modalContent = document.getElementById("detailsModalContent");
+
+            modalTitle.innerHTML = `<i class="fas fa-flag mr-2 text-yellow-500"></i>รายละเอียดปัญหาทั่วไป`;
+            modalContent.innerHTML = `
+                <p><strong>ประเภทปัญหา:</strong> ${report.problemType}</p>
+                <p><strong>สถานที่:</strong> ${report.location}</p>
+                <p><strong>ระดับความเร่งด่วน:</strong> ${report.urgency}</p>
+                <hr class="my-2"><p><strong>รายละเอียด:</strong></p>
+                <p class="pl-2 bg-gray-50 p-2 rounded-md whitespace-pre-wrap">${report.description}</p>
+                <p><strong>ข้อเสนอแนะ:</strong> ${report.suggestions || "-"}</p>
+                <hr class="my-2">
+                <p><strong>ผู้แจ้ง:</strong> ${report.name} (${report.role})</p>
+                <p><strong>เบอร์โทรศัพท์:</strong> ${report.phone || "-"}</p>
+                <p><strong>วันที่แจ้ง:</strong> ${new Date(report.timestamp).toLocaleString("th-TH")}</p>
+            `;
+            openModal(detailsModal);
+        }
+
+        // --- Other Functions ---
+        function getStatusColor(status){/*...เหมือนเดิม...*/ }
+        async function changeStatus(id){/*...เหมือนเดิม...*/ }
+        async function deleteEquipment(id){/*...เหมือนเดิม...*/ }
+        async function deleteNews(id){/*...เหมือนเดิม...*/ }
+        
+        // --- Modal Setup & Event Listeners ---
+        const openModal = (modal) => modal.classList.remove("hidden");
+        const closeModal = (modal) => modal.classList.add("hidden");
+
+        document.getElementById("addEquipmentBtn").addEventListener("click", () => { /*...เหมือนเดิม...*/ });
+        document.getElementById("addNewsBtn").addEventListener("click", () => { /*...เหมือนเดิม...*/ });
+        function editEquipment(id){/*...เหมือนเดิม...*/ }
+        function editNews(id){/*...เหมือนเดิม...*/ }
+
+        [...document.querySelectorAll("#closeEquipmentModal, #cancelEquipment")].forEach(btn => btn.addEventListener("click", () => closeModal(equipmentModal)));
+        [...document.querySelectorAll("#closeNewsModal, #cancelNews")].forEach(btn => btn.addEventListener("click", () => closeModal(newsModal)));
+        document.getElementById("closeDetailsModal").addEventListener("click", () => closeModal(detailsModal)); // <-- เพิ่ม Listener สำหรับปิด Modal ใหม่
+
+        document.getElementById("equipmentForm").addEventListener("submit", async e => { /*...เหมือนเดิม...*/ });
+        document.getElementById("newsForm").addEventListener("submit", async e => { /*...เหมือนเดิม...*/ });
+
+        // --- ส่วนที่ยังไม่ได้คัดลอกมาให้เพื่อความกระชับ แต่มีอยู่ในโค้ดเต็ม ---
+        async function loadEquipment(){allEquipment=await fetchData("getEquipment");document.getElementById("equipmentTable").innerHTML=allEquipment.map(e=>`<tr><td class="px-6 py-4"><div class="text-sm font-medium text-gray-900">${e.name}</div></td><td class="px-6 py-4 text-sm text-gray-500">${e.location}</td><td class="px-6 py-4 text-sm text-gray-500">${e.lastChecked?new Date(e.lastChecked).toLocaleDateString("th-TH"):"-"}</td><td class="px-6 py-4 text-sm text-gray-500">${e.nextCheck?new Date(e.nextCheck).toLocaleDateString("th-TH"):"-"}</td><td class="px-6 py-4 text-sm font-medium"><button onclick="editEquipment(${e.id})" class="text-green-600 hover:text-green-900 mr-3"><i class="fas fa-edit"></i></button><button onclick="deleteEquipment(${e.id})" class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button></td></tr>`).join("")}
+        async function loadNews(){allNews=await fetchData("getNews");document.getElementById("newsTable").innerHTML=allNews.map(e=>`<tr><td class="px-6 py-4"><div class="text-sm font-medium text-gray-900">${e.title}</div><div class="text-sm text-gray-500">${e.content.substring(0,70)}...</div></td><td class="px-6 py-4 text-sm text-gray-500">${new Date(e.date).toLocaleDateString("th-TH")}</td><td class="px-6 py-4 text-sm font-medium"><button onclick="editNews(${e.id})" class="text-green-600 hover:text-green-900 mr-3"><i class="fas fa-edit"></i></button><button onclick="deleteNews(${e.id})" class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button></td></tr>`).join("")}
+        function getStatusColor(status){switch(status){case"ใหม่":return"bg-red-100 text-red-800";case"กำลังดำเนินการ":return"bg-yellow-100 text-yellow-800";case"แก้ไขแล้ว":return"bg-green-100 text-green-800";default:return"bg-gray-100 text-gray-800"}}
+        async function changeStatus(id){const report=allReports.find(r=>r.id==id);if(!report)return;const statuses=["ใหม่","กำลังดำเนินการ","แก้ไขแล้ว"];const currentIndex=statuses.indexOf(report.status);const newStatus=statuses[(currentIndex+1)%statuses.length];if(await postData({action:"updateReportStatus",id:id,newStatus:newStatus})){loadReports();loadDashboard()}}
+        async function deleteEquipment(id){if(confirm("คุณต้องการลบอุปกรณ์นี้หรือไม่?")&&await postData({action:"deleteEquipment",id:id})){loadEquipment();loadDashboard()}}
+        async function deleteNews(id){if(confirm("คุณต้องการลบข่าวสารนี้หรือไม่?")&&await postData({action:"deleteNews",id:id})){loadNews();loadDashboard()}}
+        document.getElementById("addEquipmentBtn").addEventListener("click",()=>{document.getElementById("equipmentForm").reset();document.getElementById("equipmentId").value="";document.getElementById("equipmentModalTitle").textContent="เพิ่มอุปกรณ์ใหม่";openModal(equipmentModal)});
+        document.getElementById("addNewsBtn").addEventListener("click",()=>{document.getElementById("newsForm").reset();document.getElementById("newsId").value="";document.getElementById("newsModalTitle").textContent="เพิ่มข่าวสารใหม่";openModal(newsModal)});
+        function editEquipment(id){const item=allEquipment.find(e=>e.id==id);if(item){document.getElementById("equipmentId").value=item.id;document.getElementById("equipmentDate").value=item.date;document.getElementById("equipmentName").value=item.name;document.getElementById("equipmentLocation").value=item.location;document.getElementById("equipmentLastChecked").value=item.lastChecked?new Date(item.lastChecked).toISOString().split("T")[0]:"";document.getElementById("equipmentNextCheck").value=item.nextCheck?new Date(item.nextCheck).toISOString().split("T")[0]:"";document.getElementById("equipmentModalTitle").textContent="แก้ไขอุปกรณ์";openModal(equipmentModal)}}
+        function editNews(id){const item=allNews.find(n=>n.id==id);if(item){document.getElementById("newsId").value=item.id;document.getElementById("newsTitle").value=item.title;document.getElementById("newsContent").value=item.content;document.getElementById("newsModalTitle").textContent="แก้ไขข่าวสาร";openModal(newsModal)}}
+        document.getElementById("equipmentForm").addEventListener("submit",async e=>{e.preventDefault();const id=document.getElementById("equipmentId").value;const payload={action:id?"updateEquipment":"addEquipment",data:{id:id?parseInt(id):null,name:document.getElementById("equipmentName").value,location:document.getElementById("equipmentLocation").value,date:document.getElementById("equipmentDate").value,lastChecked:document.getElementById("equipmentLastChecked").value,nextCheck:document.getElementById("equipmentNextCheck").value}};if(await postData(payload)){closeModal(equipmentModal);loadEquipment();loadDashboard()}});
+        document.getElementById("newsForm").addEventListener("submit",async e=>{e.preventDefault();const id=document.getElementById("newsId").value;const payload={action:id?"updateNews":"addNews",data:{id:id?parseInt(id):null,title:document.getElementById("newsTitle").value,content:document.getElementById("newsContent").value}};if(await postData(payload)){closeModal(newsModal);loadNews();loadDashboard()}});
+    </script>
+</body>
+</html>
